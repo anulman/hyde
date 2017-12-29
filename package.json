@@ -1,0 +1,35 @@
+{
+  "name": "hyde",
+  "version": "0.0.1",
+  "description": "a stateful, jekyll-friendly cms parser for javascript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src -d dist",
+    "lint": "./node_modules/.bin/eslint src",
+    "prepublish": "npm run build",
+    "test": "./node_modules/.bin/_mocha --require babel-core/register \"tests/**/*-test.js\" -t 5s"
+  },
+  "repository": "git@github.com:anulman/hyde.git",
+  "author": "Aidan Nulman <anulman@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^5.0.0",
+    "js-yaml": "^3.10.0",
+    "jsonapi-serializer": "^3.5.5"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2017": "^6.24.1",
+    "babel-register": "^6.26.0",
+    "babel-runtime": "^6.26.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "lodash": "^4.17.4",
+    "mocha": "^4.1.0",
+    "mocha-eslint": "^4.1.0",
+    "testdouble": "^3.3.0"
+  }
+}
