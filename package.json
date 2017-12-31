@@ -1,5 +1,5 @@
 {
-  "name": "hyde",
+  "name": "mr-hyde",
   "version": "0.0.1",
   "description": "a stateful, jekyll-friendly cms parser for javascript",
   "main": "dist/index.js",
