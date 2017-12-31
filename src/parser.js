@@ -49,7 +49,7 @@ export default class Parser {
       let yaml = safeLoad(markdown.slice(4, endIndex - 1));
       let tags;
 
-      if (context) {
+      if (context && yaml.tags instanceof Array) {
         tags = yaml.tags
           .map((tag) => join(context.name, 'tags', tag))
           .map((tagId) => findOrCreateCollection.call(context, tagId));

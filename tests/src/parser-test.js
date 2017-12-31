@@ -86,26 +86,49 @@ describe('Parser', function() {
         context('with valid frontmatter & a context', function() {
           let ctx;
 
-          beforeEach(async function() {
+          beforeEach(function() {
             ctx = new Hyde('context');
-            content = await readFile('./tests/samples/with-tags.md', 'utf8');
-
-            returnValue = parser.parse(content, ctx);
           });
 
-          it('sets item tags', function() {
-            expect(returnValue.tags).to.be.instanceof(Array);
-            expect(returnValue.yaml.tags).not.to.be;
+          context('when tags exist', function() {
+            beforeEach(async function() {
+              content = await readFile('./tests/samples/with-tags.md', 'utf8');
+              returnValue = parser.parse(content, ctx);
+            });
+
+            it('sets item tags', function() {
+              expect(returnValue.tags).to.be.instanceof(Array);
+              expect(returnValue.yaml.tags).not.to.be;
+            });
+
+            it('adds tags to ctx.collections', function() {
+              for (let tag of returnValue.tags) {
+                expect(ctx.collections.includes(tag)).to.equal(true);
+              }
+            });
+
+            it('adds the item to ctx.items', function() {
+              expect(ctx.items.includes(returnValue)).to.equal(true);
+            });
           });
 
-          it('adds tags to ctx.collections', function() {
-            for (let tag of returnValue.tags) {
-              expect(ctx.collections.includes(tag)).to.equal(true);
-            }
-          });
+          context('when tags do not exist', function() {
+            beforeEach(async function() {
+              let filename = './tests/samples/without-tags.md';
 
-          it('adds the item to ctx.items', function() {
-            expect(ctx.items.includes(returnValue)).to.equal(true);
+              content = await readFile(filename, 'utf8');
+              returnValue = parser.parse(content, ctx);
+            });
+
+            it('sets a blank array', function() {
+              expect(returnValue.tags).to.be.instanceof(Array);
+              expect(returnValue.tags.length).to.equal(0);
+              expect(returnValue.yaml.tags).not.to.be;
+            });
+
+            it('adds the item to ctx.items', function() {
+              expect(ctx.items.includes(returnValue)).to.equal(true);
+            });
           });
         });
 
