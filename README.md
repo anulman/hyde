@@ -17,6 +17,13 @@ a stateful, jekyll-friendly cms parser for javascript
 - When you render a `markdown-section` with an item: https://github.com/anulman/www.aidans.computer/blob/master/app/pods/content/item/template.hbs#L5
 - The component fetches + loads the markdown separately from metadata: https://github.com/anulman/ember-cli-hyde/blob/master/addon/components/markdown-section.js#L22-L42
    - I'm hoping to extend this to support a skeletal UI, eg for loading states
+- e-cli-hyde will consume a root-level content dir by default: TODO LINK
+   - This is configurable in e-cli-build.js (`{ hyde: { directories: [] } }`): TODO LINK
+- If `prember` is installed, e-cli-hyde will generate URLs for configured directories
+    - This is configurable in e-cli-build.js (`{ hyde: { prember: [] } }`): TODO LINK
+    - Config objects resemble `{ name: 'content', prefix: 'foo', itemPrefix: 'bar', collectionPrefix: 'baz' }`: TODO LINK
+    - If a config object is a string (vs object), it uses the default `{ name, collectionPrefix: true }` config: TODO LINK
+    - Set `{ hyde: { prember: false } }` to disable prember builds: TODO LINK
 
 ### sample code
 - Sample input dir: https://github.com/anulman/www.aidans.computer/tree/master/content
