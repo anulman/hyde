@@ -7,6 +7,12 @@ import { Item } from './models';
 import { parentIdFor, findOrCreateCollection, trackModel }
   from './utils/context';
 
+export const PERMITTED_EXTENSIONS = [
+  '.md',
+  '.markdown',
+  '.mbs'
+];
+
 export default class Parser {
   constructor(context) {
     this.context = context;
@@ -15,7 +21,7 @@ export default class Parser {
   async parseFile(filepath, inputPath = '', context = this.context) {
     let ext = extname(filepath);
 
-    if (ext === '.md' || ext === '.markdown') {
+    if (PERMITTED_EXTENSIONS.includes(ext)) {
       let content = await readFile(filepath, 'utf8');
       let item = this.parse(content);
       let inputPathLength = typeof inputPath === 'string' ?
