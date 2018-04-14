@@ -3,8 +3,9 @@ import assert from 'assert';
 import Collection from './collection';
 
 export default class Item {
-  constructor({ id, parent, markdown, yaml, tags } = {}) {
+  constructor({ id, ext, parent, markdown, yaml, tags } = {}) {
     this.id = id;
+    this.ext = ext;
     this.parent = parent;
     this.yaml = yaml;
     this.markdown = markdown;

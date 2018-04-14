@@ -29,6 +29,7 @@ export default class Parser {
         0;
 
       item.id = filepath.slice(inputPathLength, ext.length * -1);
+      item.ext = ext;
 
       if (context !== undefined) {
         let itemId = join(context.name, item.id);
