@@ -18,24 +18,19 @@ export default class Parser {
     this.context = context;
   }
 
-  async parseFile(filepath, inputPath = '', context = this.context) {
+  async parseFile(filepath, { id } = {}, context = this.context) {
     let ext = extname(filepath);
 
     if (PERMITTED_EXTENSIONS.includes(ext)) {
       let content = await readFile(filepath, 'utf8');
       let item = this.parse(content);
-      let inputPathLength = typeof inputPath === 'string' ?
-        inputPath.length :
-        0;
 
-      item.id = filepath.slice(inputPathLength, ext.length * -1);
+      item.id = (id || filepath).replace(new RegExp(`${ext}$`), '');
       item.ext = ext;
 
       if (context !== undefined) {
-        let itemId = join(context.name, item.id);
-        let parentId = parentIdFor.call(context, itemId);
+        let parentId = parentIdFor.call(context, item.id);
 
-        item.id = itemId;
         item.parent = parentId !== null &&
           findOrCreateCollection.call(context, parentId);
       }
