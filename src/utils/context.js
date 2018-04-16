@@ -1,22 +1,37 @@
 import assert from 'assert';
 import { sep } from 'path';
 
-import { Item, Collection } from '../models';
+import Model from '../model';
+import Serializer from '../serializer';
+import { defaults, isObject, isPlainObject } from 'lodash';
 
-export function dbCollectionFor(constructor) {
-  switch (constructor) {
-    case Item: return this.items;
-    case Collection: return this.collections;
-    default: assert.fail('passed an invalid constructor');
+export function typeFor(model) {
+  let idComponents = model.id.split('/');
+  let typeComponents = [this.name];
+
+  if (idComponents.length > 2) {
+    typeComponents = typeComponents.concat(idComponents.slice(1, -1));
   }
+
+  if (!isObject(model.yaml)) {
+    typeComponents = typeComponents.concat(idComponents.slice(-1));
+  }
+
+  return typeComponents.join('/');
 }
 
-export function serializerFor(constructor) {
-  switch (constructor) {
-    case Item: return this.serializers.item;
-    case Collection: return this.serializers.collection;
-    default: assert.fail('passed an invalid constructor');
-  }
+export function serializerFor(model) {
+  let type = typeFor.call(this, model);
+  let yaml = model.yaml || {};
+  let relationships = yaml && yaml.relationships || {};
+  let attributes = Object.keys(yaml).filter((key) => key !== 'relationships');
+
+  relationships = ensurePushed(Object.keys(relationships), ...[
+    'tags',
+    'children'
+  ]);
+
+  return new Serializer(type, { attributes, relationships });
 }
 
 export function parentIdFor(id) {
@@ -29,27 +44,65 @@ export function parentIdFor(id) {
     null;
 }
 
-export function findOrCreateCollection(id) {
+export function parentModelFor(id) {
+  let parentId = parentIdFor(id);
+
+  return parentId !== null && findOrCreateModel.call(this, parentId);
+}
+
+export function findOrCreateModel(id, attrs) {
   assert.ok(typeof id === 'string');
 
-  let collection = this.collections.find((collection) => collection.id === id);
+  let model = this.models.find((model) => model.id === id);
 
-  if (collection === undefined) {
-    let parentId = parentIdFor.call(this, id);
-    let parent = parentId !== null &&
-      findOrCreateCollection.call(this, parentId);
+  if (model === undefined) {
+    let parent = parentModelFor.call(this, id);
 
-    collection = new Collection({ id, parent });
-    trackModel.call(this, collection);
+    model = new Model({ id, parent });
+    trackModel.call(this, model);
   }
 
-  return collection;
+  if (attrs !== undefined) {
+    for (let key of Object.keys(attrs)) {
+      let value = attrs[key];
+
+      model[key] = mergeAttribute(model, key, value);
+    }
+  }
+
+  return model;
+}
+
+function mergeAttribute(model, key, value) {
+  let modelValue = model[key];
+
+  if (isPlainObject(modelValue)) {
+    return defaults(modelValue, value);
+  } else if (modelValue instanceof Array) {
+    return modelValue.map((innerModel) => {
+      for (let innerKey of Object.keys(innerModel)) {
+        let innerValue = innerModel[innerKey];
+
+        innerModel[innerKey] = mergeAttribute(innerModel, innerKey, innerValue);
+      }
+    });
+  } else {
+    return modelValue || value;
+  }
 }
 
 export function trackModel(model) {
-  let trackedModels = dbCollectionFor.call(this, model.constructor);
+  if (!this.models.some((tracked) => tracked === model)) {
+    this.models.push(model);
+  }
+}
 
-  assert.ok(!trackedModels.some((tracked) => tracked.id === model.id));
+function ensurePushed(collection, ...args) {
+  args.forEach((arg) => {
+    if (!collection.includes(arg)) {
+      collection.push(arg);
+    }
+  });
 
-  trackedModels.push(model);
+  return collection;
 }

@@ -1,7 +1,6 @@
 import assert from 'assert';
 
 import Parser from './parser';
-import Serializer from './serializer';
 import { serializerFor } from './utils/context';
 
 const DEFAULT_NAME = 'content';
@@ -11,29 +10,10 @@ export default class Hyde {
     assert.ok(typeof name === 'string');
 
     this.name = name;
-    this.db = {
-      items: [],
-      collections: []
-    };
+    this.models = [];
 
     this.parser = new Parser(this);
-    this.serializers = {
-      item: opts.itemSerializer || new Serializer('item', {
-        attributes: ['yaml'],
-        relationships: ['parent', 'tags']
-      }),
-      collection: opts.collectionSerializer || new Serializer('collection', {
-        relationships: ['parent', 'collections', 'items']
-      })
-    };
-  }
-
-  get items() {
-    return this.db.items;
-  }
-
-  get collections() {
-    return this.db.collections;
+    this.serializers = {};
   }
 
   parse() {
@@ -45,7 +25,7 @@ export default class Hyde {
   }
 
   serialize(model) {
-    let serializer = serializerFor.call(this, model.constructor);
+    let serializer = serializerFor.call(this, model);
 
     if (serializer !== undefined) {
       return serializer.serializeWithoutBlankRels(model);
@@ -61,14 +41,6 @@ export default class Hyde {
     }
 
     return defaultInstance;
-  }
-
-  static get items() {
-    return this.defaultInstance.items;
-  }
-
-  static get collections() {
-    return this.defaultInstance.collections;
   }
 
   static parse() {

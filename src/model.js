@@ -1,15 +1,14 @@
 import assert from 'assert';
 
-import Collection from './collection';
-
-export default class Item {
-  constructor({ id, ext, parent, markdown, yaml, tags } = {}) {
+export default class Model {
+  constructor({ id, ext, parent, markdown, yaml, tags, children } = {}) {
     this.id = id;
     this.ext = ext;
     this.parent = parent;
     this.yaml = yaml;
     this.markdown = markdown;
     this.tags = tags instanceof Array ? tags : [];
+    this.children = children instanceof Array ? children : [];
   }
 
   get tags() {
@@ -25,7 +24,7 @@ export default class Item {
 
   set tags(value = []) {
     assert.ok(value instanceof Array);
-    assert.ok(value.every((tag) => tag instanceof Collection));
+    assert.ok(value.every((tag) => tag instanceof this.super));
 
     for (let tag of this._tags || []) {
       let index = tag.items.indexOf(this);
@@ -49,16 +48,16 @@ export default class Item {
   }
 
   set parent(value = null) {
-    let items = this.parent && this.parent.items;
+    let children = this.parent && this.parent.children;
 
-    if (items instanceof Array && items.includes(this)) {
-      items.splice(items.indexOf(this), 1);
+    if (children instanceof Array && children.includes(this)) {
+      children.splice(children.indexOf(this), 1);
     }
 
-    items = value && value.items;
+    children = value && value.children;
 
-    if (items instanceof Array && !items.includes(this)) {
-      items.push(this);
+    if (children instanceof Array && !children.includes(this)) {
+      children.push(this);
     }
 
     this._parent = value;
