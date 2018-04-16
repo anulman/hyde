@@ -22,7 +22,7 @@ export default class JSONAPISerializer extends Serializer {
       delete opts.relationships;
     }
 
-    if (!(opts.typeForAttribute instanceof Function)) {
+    if (!isPresent(opts.typeForAttribute)) {
       opts.typeForAttribute = typeForAttribute;
     }
 
@@ -43,7 +43,7 @@ export default class JSONAPISerializer extends Serializer {
       if (json.data instanceof Array) {
         json.data = json.data.map((item) => removeBlankCollectionsFrom(item));
       } else if (json) {
-        json = removeBlankCollectionsFrom(json.data);
+        json.data = removeBlankCollectionsFrom(json.data);
       }
     }
 
