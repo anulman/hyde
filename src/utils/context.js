@@ -5,6 +5,11 @@ import Model from '../model';
 import Serializer from '../serializer';
 import { defaults, isObject, isPlainObject } from 'lodash';
 
+const SPECIAL_KEYS = [
+  'relationships',
+  'meta'
+];
+
 export function typeFor(model) {
   let idComponents = model.id.split('/');
   let typeComponents = [this.name];
@@ -24,14 +29,16 @@ export function serializerFor(model) {
   let type = typeFor.call(this, model);
   let yaml = model.yaml || {};
   let relationships = yaml && yaml.relationships || {};
-  let attributes = Object.keys(yaml).filter((key) => key !== 'relationships');
+  let meta = yaml && yaml.meta || {};
+  let attributes = Object.keys(yaml)
+    .filter((key) => !SPECIAL_KEYS.includes(key));
 
   relationships = ensurePushed(Object.keys(relationships), ...[
     'tags',
     'children'
   ]);
 
-  return new Serializer(type, { attributes, relationships });
+  return new Serializer(type, { attributes, relationships, meta });
 }
 
 export function parentIdFor(id) {
